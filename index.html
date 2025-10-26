@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LALDR Courtesy Post Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+        
+        .panel {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        input[type="text"],
+        input[type="number"],
+        input[type="email"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .row.three-col {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+        
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 8px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .output-section {
+            position: sticky;
+            top: 20px;
+        }
+        
+        #output {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 400px;
+            white-space: pre-wrap;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        #output.empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-style: italic;
+        }
+        
+        .copy-btn {
+            background: #10b981;
+            margin-top: 0;
+        }
+        
+        .copy-btn:hover {
+            box-shadow: 0 5px 20px rgba(16, 185, 129, 0.4);
+        }
+        
+        .copy-btn.copied {
+            background: #059669;
+        }
+        
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .output-section {
+                position: static;
+            }
+        }
+        
+        .helper-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="panel">
+            <h1>🐕 Courtesy Post Generator</h1>
+            <p class="subtitle">Loved At Last Dog Rescue</p>
+            
+            <form id="dogForm">
+                <div class="form-group">
+                    <label>Contact Person's Name *</label>
+                    <input type="text" id="contactName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Contact Email *</label>
+                    <input type="email" id="contactEmail" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Dog's Name *</label>
+                    <input type="text" id="dogName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Age *</label>
+                    <div class="row">
+                        <div>
+                            <input type="number" id="ageYears" placeholder="Years" min="0" max="20">
+                        </div>
+                        <div>
+                            <input type="number" id="ageMonths" placeholder="Months" min="0" max="11">
+                        </div>
+                    </div>
+                    <div class="helper-text">Enter years and/or months</div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Breed *</label>
+                    <input type="text" id="breed" placeholder="Best guess is fine" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Personality Descriptor</label>
+                    <input type="text" id="descriptor" placeholder="e.g., charming, cuddly, lovable (we'll try to match with name)">
+                    <div class="helper-text">Optional: A positive adjective that describes their personality. We'll use this in the opening!</div>
+                </div>
+                
+                <div class="row">
+                    <div class="form-group">
+                        <label>Weight *</label>
+                        <input type="text" id="weight" placeholder="e.g., 85-90 lbs" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Height</label>
+                        <input type="text" id="height" placeholder="Ground to shoulder">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Gender *</label>
+                    <select id="gender" required>
+                        <option value="">Select...</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Personality & Story *</label>
+                    <textarea id="personality" required>I am </textarea>
+                    <div class="helper-text">Be your dog's voice to give them the best shot at finding a new home: Tell us about their personality, rescue story, likes, dislikes, behavioral and medical considerations but from their perspective (POV). E.g., "I am a sweet and loving dog who likes belly rubs and attention"</div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Training</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="crateTrained">
+                            <label for="crateTrained" style="margin: 0;">Crate trained</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="leashTrained">
+                            <label for="leashTrained" style="margin: 0;">Leash trained</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Training & Activities</label>
+                    <textarea id="training" placeholder="Continuing in your dog's voice, tell us about their training, energy levels and activities"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>I get along with:</label>
+                    <div class="row three-col">
+                        <div>
+                            <label style="font-size: 13px; margin-bottom: 4px;">Dogs</label>
+                            <select id="compatDogs">
+                                <option value="">Select...</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                                <option value="Not sure">Not sure</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size: 13px; margin-bottom: 4px;">Cats</label>
+                            <select id="compatCats">
+                                <option value="">Select...</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                                <option value="Not sure">Not sure</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size: 13px; margin-bottom: 4px;">Kids</label>
+                            <select id="compatKids">
+                                <option value="">Select...</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                                <option value="Not sure">Not sure</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Compatibility comments</label>
+                    <textarea id="compatibility" placeholder="If needed, provide more context with regards to interactions"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Health & Vaccinations</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="vaccinated">
+                            <label for="vaccinated" style="margin: 0;">Vaccinated</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="spayedNeutered">
+                            <label for="spayedNeutered" style="margin: 0;">Spayed/Neutered</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="microchipped">
+                            <label for="microchipped" style="margin: 0;">Microchipped</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="houseTrained">
+                            <label for="houseTrained" style="margin: 0;">House Trained</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Additional Health Info</label>
+                    <textarea id="healthNotes" placeholder="Any special needs, medical conditions, or recent vet visits to mention?"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Adoption Fee</label>
+                    <input type="text" id="adoptionFee" value="$100">
+                </div>
+                
+                <button type="submit">Submit</button>
+            </form>
+            
+            <div id="successMessage" style="display: none; background: #10b981; color: white; padding: 15px; border-radius: 8px; margin-top: 15px; text-align: center;">
+                ✓ Successfully submitted! You'll receive a confirmation email shortly.
+            </div>
+            <div id="errorMessage" style="display: none; background: #ef4444; color: white; padding: 15px; border-radius: 8px; margin-top: 15px; text-align: center;">
+                ⚠ There was an error submitting the form. Please try again or email directly.
+            </div>
+        </div>
+        
+        <div class="panel output-section">
+            <h1>📝 Generated Post</h1>
+            <p class="subtitle">Review and copy to Petstablished</p>
+            
+            <div id="output" class="empty">Fill out the form and click "Generate Courtesy Post" to see the result here</div>
+            
+            <button class="copy-btn" id="copyBtn" style="display: none;">Copy to Clipboard</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('dogForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            generatePost();
+        });
+
+        document.getElementById('copyBtn').addEventListener('click', function() {
+            const output = document.getElementById('output').textContent;
+            navigator.clipboard.writeText(output).then(() => {
+                const btn = document.getElementById('copyBtn');
+                const originalText = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        });
+
+        function generatePost() {
+            const data = {
+                contactName: document.getElementById('contactName').value,
+                contactEmail: document.getElementById('contactEmail').value,
+                dogName: document.getElementById('dogName').value,
+                ageYears: document.getElementById('ageYears').value,
+                ageMonths: document.getElementById('ageMonths').value,
+                breed: document.getElementById('breed').value,
+                descriptor: document.getElementById('descriptor').value,
+                weight: document.getElementById('weight').value,
+                height: document.getElementById('height').value,
+                gender: document.getElementById('gender').value,
+                personality: document.getElementById('personality').value,
+                compatDogs: document.getElementById('compatDogs').value,
+                compatCats: document.getElementById('compatCats').value,
+                compatKids: document.getElementById('compatKids').value,
+                compatibility: document.getElementById('compatibility').value,
+                crateTrained: document.getElementById('crateTrained').checked,
+                leashTrained: document.getElementById('leashTrained').checked,
+                training: document.getElementById('training').value,
+                healthNotes: document.getElementById('healthNotes').value,
+                adoptionFee: document.getElementById('adoptionFee').value,
+                vaccinated: document.getElementById('vaccinated').checked,
+                spayedNeutered: document.getElementById('spayedNeutered').checked,
+                microchipped: document.getElementById('microchipped').checked,
+                houseTrained: document.getElementById('houseTrained').checked
+            };
+
+            const post = createCourtesyPost(data);
+            const outputEl = document.getElementById('output');
+            outputEl.textContent = post;
+            outputEl.classList.remove('empty');
+            document.getElementById('copyBtn').style.display = 'block';
+        }
+
+        function createCourtesyPost(data) {
+            let post = `${data.dogName} (Courtesy Post)\n\n`;
+            post += `THIS IS A COURTESY POST. PLEASE CONTACT THE PERSON OR GROUP LISTED BELOW. THIS IS NOT A LOVED AT LAST DOG.\n\n`;
+            post += `Please do NOT submit an application through LALDR. Please contact ${data.contactName} at ${data.contactEmail} for more information or to adopt.\n\n`;
+            
+            // Get descriptor - use provided one or generate one
+            const descriptor = data.descriptor || getAdjective();
+            post += `Hi everyone, I am the ${descriptor} ${data.dogName} and here's some information about me:\n\n`;
+            
+            // Format age
+            let ageStr = '';
+            if (data.ageYears && data.ageMonths) {
+                ageStr = `${data.ageYears} years ${data.ageMonths} months`;
+            } else if (data.ageYears) {
+                ageStr = data.ageYears === '1' ? '1 year' : `${data.ageYears} years`;
+            } else if (data.ageMonths) {
+                ageStr = data.ageMonths === '1' ? '1 month' : `${data.ageMonths} months`;
+            }
+            
+            // Stats section
+            let stats = `Name: ${data.dogName} Age: ${ageStr} Breed: ${data.breed} `;
+            if (data.gender) stats += `Gender: ${data.gender} `;
+            stats += `Weight: ${data.weight}`;
+            if (data.height) stats += ` Height: ${data.height}`;
+            post += stats + `\n\n`;
+
+            // Main personality section - convert to first person (backup in case they write in third person)
+            post += convertToFirstPerson(data.personality, data.dogName) + `\n\n`;
+
+            // Compatibility section with dropdown results
+            let compatLines = [];
+            if (data.compatDogs) compatLines.push(`  Dogs: ${data.compatDogs}`);
+            if (data.compatCats) compatLines.push(`  Cats: ${data.compatCats}`);
+            if (data.compatKids) compatLines.push(`  Kids: ${data.compatKids}`);
+            
+            if (compatLines.length > 0) {
+                post += `I get along with:\n${compatLines.join('\n')}\n\n`;
+            }
+            
+            // Additional compatibility details
+            if (data.compatibility) {
+                post += convertToFirstPerson(data.compatibility, data.dogName) + `\n\n`;
+            }
+
+            // Training section
+            let trainingLines = [];
+            if (data.crateTrained) trainingLines.push('crate trained');
+            if (data.leashTrained) trainingLines.push('leash trained');
+            
+            if (trainingLines.length > 0 || data.training) {
+                if (trainingLines.length > 0) {
+                    post += `I am ${trainingLines.join(' and ')}.`;
+                    if (data.training) {
+                        post += ` ${convertToFirstPerson(data.training, data.dogName)}`;
+                    }
+                    post += `\n\n`;
+                } else if (data.training) {
+                    post += convertToFirstPerson(data.training, data.dogName) + `\n\n`;
+                }
+            }
+
+            // Health status
+            let healthStatus = [];
+            if (data.houseTrained) healthStatus.push('fully house trained');
+            if (data.spayedNeutered) healthStatus.push(data.gender === 'Male' ? 'neutered' : 'spayed');
+            if (data.microchipped) healthStatus.push('microchipped');
+            if (data.vaccinated) healthStatus.push('my shots are up to date');
+            
+            if (healthStatus.length > 0) {
+                post += `I am ${healthStatus.join(', ')}.`;
+                if (data.healthNotes) {
+                    post += ` ${convertToFirstPerson(data.healthNotes, data.dogName)}`;
+                }
+                post += `\n\n`;
+            } else if (data.healthNotes) {
+                post += convertToFirstPerson(data.healthNotes, data.dogName) + `\n\n`;
+            }
+
+            // Adoption fee
+            if (data.adoptionFee) {
+                post += `An adoption fee of ${data.adoptionFee} applies.\n\n`;
+            }
+
+            // Footer
+            post += `THIS IS A COURTESY POST. PLEASE CONTACT THE PERSON OR GROUP LISTED BELOW. THIS IS NOT A LOVED AT LAST DOG.\n\n`;
+            post += `Please do NOT submit an application through LALDR. Please contact ${data.contactName} at ${data.contactEmail} for more information or to adopt.`;
+
+            return post;
+        }
+
+        function getAdjective() {
+            const adjectives = ['adorable', 'charming', 'lovable', 'wonderful', 'amazing', 'sweet', 'delightful'];
+            return adjectives[Math.floor(Math.random() * adjectives.length)];
+        }
+
+        function convertToFirstPerson(text, dogName) {
+            if (!text) return '';
+            
+            let converted = text;
+            
+            // Remove foster-to-adopt references
+            converted = converted.replace(/\bfoster[- ]to[- ]adopt\b/gi, '');
+            converted = converted.replace(/\bfoster to adopt\b/gi, '');
+            
+            // Remove paragraphs that start with descriptors like "This sweet X year old"
+            converted = converted.replace(/This\s+(sweet|adorable|lovely|wonderful|amazing|beautiful|handsome)\s+\d+\s+(year|month)\s+old[^.]*\./gi, '');
+            
+            // Replace dog's name with "I" when it's the subject
+            converted = converted.replace(new RegExp(`\\b${dogName}\\b`, 'gi'), 'I');
+            
+            // Convert third person references to first person
+            converted = converted.replace(/\b(he|she)\b/gi, 'I');
+            converted = converted.replace(/\b(him|her)\b/gi, 'me');
+            converted = converted.replace(/\b(his|her)\b/gi, 'my');
+            converted = converted.replace(/\b(himself|herself)\b/gi, 'myself');
+            
+            // Convert "the dog" or "this dog" to "I"
+            converted = converted.replace(/\b(the|this|that) dog\b/gi, 'I');
+            
+            // Fix verb conjugations - CRITICAL: Order matters! Do contractions and complex forms first
+            converted = converted.replace(/\bI's\b/gi, 'I am');
+            converted = converted.replace(/\bI is\b/gi, 'I am');
+            converted = converted.replace(/\bI has\b/gi, 'I have');
+            converted = converted.replace(/\bI does\b/gi, 'I do');
+            converted = converted.replace(/\bI was a\b/gi, 'I was a');
+            
+            // Common verbs that need -s removed after "I"
+            const verbs = [
+                'loves', 'enjoys', 'needs', 'likes', 'gets', 'goes', 'wants', 'thinks', 'knows',
+                'thrives', 'requires', 'prefers', 'lives', 'plays', 'runs', 'walks', 'eats',
+                'sleeps', 'comes', 'feels', 'seems', 'becomes', 'makes', 'takes', 'gives',
+                'shows', 'brings', 'learns', 'understands', 'responds', 'reacts', 'barks',
+                'jumps', 'sits', 'stays', 'waits', 'follows', 'listens', 'watches', 'helps',
+                'keeps', 'meets', 'greets', 'pulls', 'sniffs', 'chews', 'digs', 'sheds',
+                'weighs', 'stands', 'fetches', 'catches', 'swims', 'hikes', 'explores'
+            ];
+            
+            verbs.forEach(verbWithS => {
+                const baseVerb = verbWithS.slice(0, -1); // Remove the 's'
+                const regex = new RegExp(`\\bI ${verbWithS}\\b`, 'gi');
+                converted = converted.replace(regex, `I ${baseVerb}`);
+            });
+            
+            // Fix possessive issues after "for I" or "to I" or similar
+            converted = converted.replace(/\bfor I\b/gi, 'for me');
+            converted = converted.replace(/\bto I\b/gi, 'to me');
+            converted = converted.replace(/\bwith I\b/gi, 'with me');
+            converted = converted.replace(/\bat I\b/gi, 'at me');
+            converted = converted.replace(/\bof I\b/gi, 'of me');
+            converted = converted.replace(/\bknow I\b/gi, 'know me');
+            converted = converted.replace(/\bmatch for I\b/gi, 'match for me');
+            
+            // Fix phrases like "in which I lives" or similar awkward constructions
+            converted = converted.replace(/in which I (live|lived|am)/gi, 'that I $1 with');
+            converted = converted.replace(/with which I/gi, 'that I');
+            
+            // Owner/adopter references
+            converted = converted.replace(/\b(my|the) (owner|adopter|person|family)\b/gi, 'my person');
+            converted = converted.replace(/\btheir owner\b/gi, 'my person');
+            
+            // Capitalize "My" at start of sentences
+            converted = converted.replace(/\.\s+my\b/g, '. My');
+            converted = converted.replace(/^\s*my\b/g, 'My');
+            converted = converted.replace(/\n\s*my\b/g, '\nMy');
+            
+            // Clean up any awkward constructions
+            converted = converted.replace(/\bI I\b/gi, 'I');
+            converted = converted.replace(/\bme me\b/gi, 'me');
+            converted = converted.replace(/\s+/g, ' '); // Clean up multiple spaces
+            converted = converted.replace(/\n\s*\n\s*\n/g, '\n\n'); // Clean up multiple line breaks
+            
+            return converted.trim();
+        }
+    </script>
+</body>
+</html>
