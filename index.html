@@ -375,7 +375,9 @@
     </div>
 
     <script>
-        document.getElementById('dogForm').addEventListener('submit', function(e) {
+       const FORMSPREE_ENDPOINT = 'https://formspree.io/f/manplqzq';
+       
+       document.getElementById('dogForm').addEventListener('submit', function(e) {
             e.preventDefault();
             generatePost();
         });
@@ -394,7 +396,7 @@
             });
         });
 
-        function generatePost() {
+        function submitToFormSpree() {
             const data = {
                 contactName: document.getElementById('contactName').value,
                 contactEmail: document.getElementById('contactEmail').value,
