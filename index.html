@@ -189,6 +189,26 @@
             margin-top: 4px;
             font-style: italic;
         }
+        
+        .success-message {
+            display: none;
+            background: #10b981;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+        }
+        
+        .error-message {
+            display: none;
+            background: #ef4444;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -354,32 +374,32 @@
                 </div>
                 
                 <button type="submit">Submit</button>
+                
+                <div class="success-message" id="successMessage">
+                    ✓ Successfully submitted! You'll receive a confirmation email shortly.
+                </div>
+                <div class="error-message" id="errorMessage">
+                    ⚠ There was an error submitting the form. Please try again or email directly.
+                </div>
             </form>
-            
-            <div id="successMessage" style="display: none; background: #10b981; color: white; padding: 15px; border-radius: 8px; margin-top: 15px; text-align: center;">
-                ✓ Successfully submitted! You'll receive a confirmation email shortly.
-            </div>
-            <div id="errorMessage" style="display: none; background: #ef4444; color: white; padding: 15px; border-radius: 8px; margin-top: 15px; text-align: center;">
-                ⚠ There was an error submitting the form. Please try again or email directly.
-            </div>
         </div>
         
         <div class="panel output-section">
             <h1>📝 Generated Post</h1>
             <p class="subtitle">Review and copy to Petstablished</p>
             
-            <div id="output" class="empty">Fill out the form and click "Generate Courtesy Post" to see the result here</div>
+            <div id="output" class="empty">Fill out the form and click "Submit" to see the result here</div>
             
             <button class="copy-btn" id="copyBtn" style="display: none;">Copy to Clipboard</button>
         </div>
     </div>
 
     <script>
-       const FORMSPREE_ENDPOINT = 'https://formspree.io/f/manplqzq';
-       
-       document.getElementById('dogForm').addEventListener('submit', function(e) {
+        const FORMSPREE_ENDPOINT = 'https://formspree.io/f/manplqzq';
+        
+        document.getElementById('dogForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            generatePost();
+            submitToFormspree();
         });
 
         document.getElementById('copyBtn').addEventListener('click', function() {
@@ -396,7 +416,65 @@
             });
         });
 
-        function submitToFormSpree() {
+        async function submitToFormspree() {
+            // First generate the post to show in the preview
+            generatePost();
+            
+            // Collect all form data
+            const formData = {
+                contactName: document.getElementById('contactName').value,
+                contactEmail: document.getElementById('contactEmail').value,
+                dogName: document.getElementById('dogName').value,
+                ageYears: document.getElementById('ageYears').value,
+                ageMonths: document.getElementById('ageMonths').value,
+                breed: document.getElementById('breed').value,
+                descriptor: document.getElementById('descriptor').value,
+                weight: document.getElementById('weight').value,
+                height: document.getElementById('height').value,
+                gender: document.getElementById('gender').value,
+                personality: document.getElementById('personality').value,
+                compatDogs: document.getElementById('compatDogs').value,
+                compatCats: document.getElementById('compatCats').value,
+                compatKids: document.getElementById('compatKids').value,
+                compatibility: document.getElementById('compatibility').value,
+                crateTrained: document.getElementById('crateTrained').checked ? 'Yes' : 'No',
+                leashTrained: document.getElementById('leashTrained').checked ? 'Yes' : 'No',
+                training: document.getElementById('training').value,
+                healthNotes: document.getElementById('healthNotes').value,
+                adoptionFee: document.getElementById('adoptionFee').value,
+                vaccinated: document.getElementById('vaccinated').checked,
+                spayedNeutered: document.getElementById('spayedNeutered').checked,
+                microchipped: document.getElementById('microchipped').checked,
+                houseTrained: document.getElementById('houseTrained').checked,
+                generatedPost: document.getElementById('output').textContent
+            };
+
+            try {
+                const response = await fetch(FORMSPREE_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    document.getElementById('successMessage').style.display = 'block';
+                    document.getElementById('errorMessage').style.display = 'none';
+                    setTimeout(() => {
+                        document.getElementById('successMessage').style.display = 'none';
+                    }, 5000);
+                } else {
+                    throw new Error('Submission failed');
+                }
+            } catch (error) {
+                document.getElementById('errorMessage').style.display = 'block';
+                document.getElementById('successMessage').style.display = 'none';
+                console.error('Error:', error);
+            }
+        }
+
+        function generatePost() {
             const data = {
                 contactName: document.getElementById('contactName').value,
                 contactEmail: document.getElementById('contactEmail').value,
@@ -432,48 +510,33 @@
         }
 
         function createCourtesyPost(data) {
-            let post = `${data.dogName} (Courtesy Post)\n\n`;
-            post += `THIS IS A COURTESY POST. PLEASE CONTACT THE PERSON OR GROUP LISTED BELOW. THIS IS NOT A LOVED AT LAST DOG.\n\n`;
-            post += `Please do NOT submit an application through LALDR. Please contact ${data.contactName} at ${data.contactEmail} for more information or to adopt.\n\n`;
+            let post = data.dogName + ' (Courtesy Post)\n\n';
+            post += 'THIS IS A COURTESY POST. PLEASE CONTACT THE PERSON OR GROUP LISTED BELOW. THIS IS NOT A LOVED AT LAST DOG.\n\n';
+            post += 'Please do NOT submit an application through LALDR. Please contact ' + data.contactName + ' at ' + data.contactEmail + ' for more information or to adopt.\n\n';
             
             // Get descriptor - use provided one or generate one
             const descriptor = data.descriptor || getAdjective();
-            post += `Hi everyone, I am the ${descriptor} ${data.dogName} and here's some information about me:\n\n`;
+            post += 'Hi everyone, I am the ' + descriptor + ' ' + data.dogName + ' and here\'s some information about me:\n\n';
             
             // Format age
             let ageStr = '';
             if (data.ageYears && data.ageMonths) {
-                ageStr = `${data.ageYears} years ${data.ageMonths} months`;
+                ageStr = data.ageYears + ' years ' + data.ageMonths + ' months';
             } else if (data.ageYears) {
-                ageStr = data.ageYears === '1' ? '1 year' : `${data.ageYears} years`;
+                ageStr = data.ageYears == '1' ? '1 year' : data.ageYears + ' years';
             } else if (data.ageMonths) {
-                ageStr = data.ageMonths === '1' ? '1 month' : `${data.ageMonths} months`;
+                ageStr = data.ageMonths == '1' ? '1 month' : data.ageMonths + ' months';
             }
             
             // Stats section
-            let stats = `Name: ${data.dogName} Age: ${ageStr} Breed: ${data.breed} `;
-            if (data.gender) stats += `Gender: ${data.gender} `;
-            stats += `Weight: ${data.weight}`;
-            if (data.height) stats += ` Height: ${data.height}`;
-            post += stats + `\n\n`;
+            let stats = 'Name: ' + data.dogName + ' Age: ' + ageStr + ' Breed: ' + data.breed + ' ';
+            if (data.gender) stats += 'Gender: ' + data.gender + ' ';
+            stats += 'Weight: ' + data.weight;
+            if (data.height) stats += ' Height: ' + data.height;
+            post += stats + '\n\n';
 
             // Main personality section - convert to first person (backup in case they write in third person)
-            post += convertToFirstPerson(data.personality, data.dogName) + `\n\n`;
-
-            // Compatibility section with dropdown results
-            let compatLines = [];
-            if (data.compatDogs) compatLines.push(`  Dogs: ${data.compatDogs}`);
-            if (data.compatCats) compatLines.push(`  Cats: ${data.compatCats}`);
-            if (data.compatKids) compatLines.push(`  Kids: ${data.compatKids}`);
-            
-            if (compatLines.length > 0) {
-                post += `I get along with:\n${compatLines.join('\n')}\n\n`;
-            }
-            
-            // Additional compatibility details
-            if (data.compatibility) {
-                post += convertToFirstPerson(data.compatibility, data.dogName) + `\n\n`;
-            }
+            post += convertToFirstPerson(data.personality, data.dogName) + '\n\n';
 
             // Training section
             let trainingLines = [];
@@ -482,14 +545,29 @@
             
             if (trainingLines.length > 0 || data.training) {
                 if (trainingLines.length > 0) {
-                    post += `I am ${trainingLines.join(' and ')}.`;
+                    post += 'I am ' + trainingLines.join(' and ') + '.';
                     if (data.training) {
-                        post += ` ${convertToFirstPerson(data.training, data.dogName)}`;
+                        post += ' ' + convertToFirstPerson(data.training, data.dogName);
                     }
-                    post += `\n\n`;
+                    post += '\n\n';
                 } else if (data.training) {
-                    post += convertToFirstPerson(data.training, data.dogName) + `\n\n`;
+                    post += convertToFirstPerson(data.training, data.dogName) + '\n\n';
                 }
+            }
+
+            // Compatibility section with dropdown results
+            let compatLines = [];
+            if (data.compatDogs) compatLines.push('  Dogs: ' + data.compatDogs);
+            if (data.compatCats) compatLines.push('  Cats: ' + data.compatCats);
+            if (data.compatKids) compatLines.push('  Kids: ' + data.compatKids);
+            
+            if (compatLines.length > 0) {
+                post += 'I get along with:\n' + compatLines.join('\n') + '\n\n';
+            }
+            
+            // Additional compatibility details
+            if (data.compatibility) {
+                post += convertToFirstPerson(data.compatibility, data.dogName) + '\n\n';
             }
 
             // Health status
@@ -500,23 +578,23 @@
             if (data.vaccinated) healthStatus.push('my shots are up to date');
             
             if (healthStatus.length > 0) {
-                post += `I am ${healthStatus.join(', ')}.`;
+                post += 'I am ' + healthStatus.join(', ') + '.';
                 if (data.healthNotes) {
-                    post += ` ${convertToFirstPerson(data.healthNotes, data.dogName)}`;
+                    post += ' ' + convertToFirstPerson(data.healthNotes, data.dogName);
                 }
-                post += `\n\n`;
+                post += '\n\n';
             } else if (data.healthNotes) {
-                post += convertToFirstPerson(data.healthNotes, data.dogName) + `\n\n`;
+                post += convertToFirstPerson(data.healthNotes, data.dogName) + '\n\n';
             }
 
             // Adoption fee
             if (data.adoptionFee) {
-                post += `An adoption fee of ${data.adoptionFee} applies.\n\n`;
+                post += 'An adoption fee of ' + data.adoptionFee + ' applies.\n\n';
             }
 
             // Footer
-            post += `THIS IS A COURTESY POST. PLEASE CONTACT THE PERSON OR GROUP LISTED BELOW. THIS IS NOT A LOVED AT LAST DOG.\n\n`;
-            post += `Please do NOT submit an application through LALDR. Please contact ${data.contactName} at ${data.contactEmail} for more information or to adopt.`;
+            post += 'THIS IS A COURTESY POST. PLEASE CONTACT THE PERSON OR GROUP LISTED BELOW. THIS IS NOT A LOVED AT LAST DOG.\n\n';
+            post += 'Please do NOT submit an application through LALDR. Please contact ' + data.contactName + ' at ' + data.contactEmail + ' for more information or to adopt.';
 
             return post;
         }
@@ -539,7 +617,7 @@
             converted = converted.replace(/This\s+(sweet|adorable|lovely|wonderful|amazing|beautiful|handsome)\s+\d+\s+(year|month)\s+old[^.]*\./gi, '');
             
             // Replace dog's name with "I" when it's the subject
-            converted = converted.replace(new RegExp(`\\b${dogName}\\b`, 'gi'), 'I');
+            converted = converted.replace(new RegExp('\\b' + dogName + '\\b', 'gi'), 'I');
             
             // Convert third person references to first person
             converted = converted.replace(/\b(he|she)\b/gi, 'I');
@@ -570,8 +648,8 @@
             
             verbs.forEach(verbWithS => {
                 const baseVerb = verbWithS.slice(0, -1); // Remove the 's'
-                const regex = new RegExp(`\\bI ${verbWithS}\\b`, 'gi');
-                converted = converted.replace(regex, `I ${baseVerb}`);
+                const regex = new RegExp('\\bI ' + verbWithS + '\\b', 'gi');
+                converted = converted.replace(regex, 'I ' + baseVerb);
             });
             
             // Fix possessive issues after "for I" or "to I" or similar
@@ -607,7 +685,3 @@
     </script>
 </body>
 </html>
-
-
-
-
